@@ -1,6 +1,7 @@
 from flask import g
 from gemt import app
 import sqlite3
+from util.data_util import get_current_date_formated
 
 COMPLETE_ENTITY_SQL = 'select id, reader_key, machine_id, created_date, authenticated_date from auth_keys'
 
@@ -19,7 +20,7 @@ def before_request():
 def teardown_request(exception):
     """ Called after response has been constructed """
     db = getattr(g, 'db', None)
-    if db is None:
+    if db is not None:
         db.close()
 
 
@@ -50,3 +51,14 @@ def add_key(reader_key, created_date):
 def get_key(key_value):
     cur = g.db.execute('select * from auth_keys where reader_key="%s"' % key_value)
     return [dict(id=row[0], reader_key=row[1], machine_id=row[2], created_date=row[3], authenticated_date=row[4]) for row in cur.fetchall()]
+
+
+def authenticate_key(entity_id, machine_id):
+    print entity_id, machine_id
+    cur = g.db.execute("""
+    UPDATE auth_keys
+    SET machine_id = ?, authenticated_date = ?
+    WHERE id = ?
+    """, (machine_id, get_current_date_formated(), entity_id))
+    g.db.commit()
+    return 'ok'

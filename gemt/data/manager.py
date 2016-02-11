@@ -1,14 +1,16 @@
 import sqlite3
 
+from util.data_util import generate_key, get_current_date_formated
+
 keys_auth = {
     "AA": {
-        'reader_key': '1234567890123456',
+        'reader_key': generate_key(),
         'machine_id': 'BA110544d821 ',
         'created_date': '2016/02/12 - 01:30:00',
         'authenticated_date': '2016/02/16 - 01:30:00'
     },
     "A": {
-        'reader_key': '1234567890123456',
+        'reader_key': generate_key(),
         'machine_id': 'DE110544d821 ',
         'created_date': '2016/02/12 - 01:31:00',
         'authenticated_date': '2016/02/16 - 01:31:00'
@@ -35,6 +37,10 @@ def fill_db():
     for d in keys_auth.itervalues():
         c.execute('insert into auth_keys (reader_key, machine_id, created_date, authenticated_date) values (?, ?, ?, ?)',
                   [d['reader_key'], d['machine_id'], d['created_date'], d['authenticated_date']])
+
+    for _ in range(20):
+        c.execute('insert into auth_keys (reader_key, created_date) values (?, ?)',
+                  [generate_key(), get_current_date_formated()])
     db.commit()
     db.close()
 

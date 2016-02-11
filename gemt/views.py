@@ -43,10 +43,16 @@ def get_all_content():
 @app.route('/add', methods=['POST'])
 def add_key():
     validate_schema(mandatory=['key_value'])
-    return jsonify({'Result': KeysHandler(request.json_data['key_value']).add_key()})
+    return jsonify({'Result': KeysHandler(request.json['key_value']).add_key()})
 
 
 @app.route('/check/<string:key_value>', methods=['PUT'])
-def validate_key(key_value):
+def check_key(key_value):
     validate_schema(mandatory=['machine_id'])
     return jsonify({'Result': KeysHandler(key_value).validate_key(request.json['machine_id'])})
+
+
+@app.route('/authenticate/<string:key_value>', methods=['PUT'])
+def authenticate_key(key_value):
+    validate_schema(mandatory=['machine_id'])
+    return jsonify({'Result': KeysHandler(key_value).authenticate_key(request.json['machine_id'])})
