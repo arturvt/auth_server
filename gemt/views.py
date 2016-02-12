@@ -31,8 +31,8 @@ def index():
 
 
 @app.route('/help', methods=['GET'])
-def index():
-    return '<br>'.join(help_app)
+def help_route():
+    return jsonify({'Help Message': help_app})
 
 
 @app.route('/get_all', methods=['GET'])
