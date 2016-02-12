@@ -30,6 +30,11 @@ def index():
     return '<br>'.join(help_app)
 
 
+@app.route('/help', methods=['GET'])
+def index():
+    return '<br>'.join(help_app)
+
+
 @app.route('/get_all', methods=['GET'])
 def get_all_content():
     return jsonify({'All': get_all()})
