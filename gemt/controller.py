@@ -19,7 +19,9 @@ class KeysHandler(object):
         :param machine_id:
         :return:
         """
-        key_entity = get_key(self.key_value)[0]
+        key_entity = get_key(self.key_value)
+        if key_entity is None:
+            return 'Invalid value'
         if key_entity['machine_id'] is not None:
             if key_entity['machine_id'] == machine_id:
                 return 'Already authenticated by machine_id.'
@@ -28,7 +30,9 @@ class KeysHandler(object):
         return 'This key is available.'
 
     def authenticate_key(self, machine_id):
-        key_entity = get_key(self.key_value)[0]
+        key_entity = get_key(self.key_value)
+        if key_entity is None:
+            return 'Invalid value'
         if key_entity['machine_id'] is not None:
             if key_entity['machine_id'] == machine_id:
                 return 'Already authenticated by machine_id.'
