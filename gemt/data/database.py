@@ -1,27 +1,37 @@
-from flask import g
+from gemt.data.util.data_util import get_current_date_formated
 from gemt import app
-import sqlite3
-from util.data_util import get_current_date_formated
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
 
 COMPLETE_ENTITY_SQL = 'select id, reader_key, machine_id, created_date, authenticated_date from auth_keys'
 
-def connect_db():
-    """Connects with database """
-    return sqlite3.connect(app.config['DATABASE'])
+engine = create_engine('postgresql+psycopg2://atenorio@/postgres', convert_unicode=True)
+db_session = scoped_session(sessionmaker(autocommit=False,
+                                         autoflush=False,
+                                         bind=engine))
+Base = declarative_base()
+Base.query = db_session.query_property()
+
+from gemt.data.models.key_model import KeyModel
 
 
-@app.before_request
-def before_request():
-    """ Called before every request """
-    g.db = connect_db()
+def init_db():
+    import gemt.data.models.key_model
+    Base.metadata.create_all(bind=engine)
+
+
+# @app.before_request
+# def before_request():
+#     """ Called before every request """
+#     g.db = db
 
 
 @app.teardown_request
 def teardown_request(exception):
     """ Called after response has been constructed """
-    db = getattr(g, 'db', None)
-    if db is not None:
-        db.close()
+    db_session.remove()
 
 
 def get_all():
@@ -29,36 +39,29 @@ def get_all():
     Lists the keys and computer ids.
     :return:
     """
-    cur = g.db.execute('select reader_key, machine_id from auth_keys order by id desc')
-    return [dict(reader_key=row[0], machine_id=row[1]) for row in cur.fetchall()]
+    all_keys = KeyModel.query.all()
+    result = [l.get_dict() for l in all_keys]
+    return result
 
 
-def list_all_content():
-    """
-    List all content, including nullable values
-    :return:
-    """
-    cur = g.db.execute(COMPLETE_ENTITY_SQL + ' order by id desc')
-    return [dict(id=row[0], reader_key=row[1], machine_id=row[2], created_date=row[3], authenticated_date=row[4]) for row in cur.fetchall()]
-
-
-def add_key(reader_key, created_date):
-    g.db.execute('insert into auth_keys (reader_key, created_date) values (?, ?)',
-                 [reader_key, created_date])
-    g.db.commit()
+def add_key(reader_key):
+    k = KeyModel(reader_key)
+    db_session.add(k)
+    db_session.commit()
 
 
 def get_key(key_value):
-    cur = g.db.execute('select * from auth_keys where reader_key="%s"' % key_value)
-    return [dict(id=row[0], reader_key=row[1], machine_id=row[2], created_date=row[3], authenticated_date=row[4]) for row in cur.fetchall()]
+    result = KeyModel.query.filter_by(reader_key=key_value).first()
+    if result is None:
+        return None
+    return result.get_dict()
 
 
 def authenticate_key(entity_id, machine_id):
     print entity_id, machine_id
-    cur = g.db.execute("""
-    UPDATE auth_keys
-    SET machine_id = ?, authenticated_date = ?
-    WHERE id = ?
-    """, (machine_id, get_current_date_formated(), entity_id))
-    g.db.commit()
+    result = KeyModel.query.filter_by(id=entity_id).first()
+    result.machine_id = machine_id
+    result.authenticated_date = get_current_date_formated()
+    db_session.add(result)
+    db_session.commit()
     return 'ok'
