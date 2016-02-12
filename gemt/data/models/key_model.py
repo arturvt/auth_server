@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String
 from gemt.data.util.data_util import get_current_date_formated
-from gemt.data.database import Base
+from gemt import db
 
 
-class KeyModel(Base):
+class KeyModel(db.Model):
+
     __tablename__ = 'auth_keys'
 
     id = Column(Integer, primary_key=True)

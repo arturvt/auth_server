@@ -1,31 +1,8 @@
 from gemt.data.util.data_util import get_current_date_formated
-from gemt import app
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-
-
-COMPLETE_ENTITY_SQL = 'select id, reader_key, machine_id, created_date, authenticated_date from auth_keys'
-
-engine = create_engine('postgresql+psycopg2://atenorio@/postgres', convert_unicode=True)
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=engine))
-Base = declarative_base()
-Base.query = db_session.query_property()
-
+from gemt import app, db
 from gemt.data.models.key_model import KeyModel
 
-
-def init_db():
-    import gemt.data.models.key_model
-    Base.metadata.create_all(bind=engine)
-
-
-# @app.before_request
-# def before_request():
-#     """ Called before every request """
-#     g.db = db
+db_session = db.session
 
 
 @app.teardown_request
