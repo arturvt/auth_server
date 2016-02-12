@@ -1,1 +1,1 @@
-web: gunicorn run_server:app --chdir gemt --log-file -
+web: gunicorn runserver:app --chdir gemt --log-file -
