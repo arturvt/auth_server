@@ -37,6 +37,6 @@ class KeysHandler(object):
             if key_entity['machine_id'] == machine_id:
                 return 'Already authenticated by machine_id.'
             else:
-                return None
+                return 'Key is used by other machine'
         authenticate_key(entity_id=key_entity['id'], machine_id=machine_id)
         return 'Authenticated!'
