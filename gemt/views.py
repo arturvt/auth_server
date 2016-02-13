@@ -1,6 +1,6 @@
 from gemt import app
 from flask import jsonify, request
-from gemt.data.database import get_all
+from gemt.data.database import get_all, get_free_content
 from controller import KeysHandler
 
 help_app = ['Welcome to GEMT Reader server.']
@@ -38,6 +38,11 @@ def help_route():
 @app.route('/get_all', methods=['GET'])
 def get_all_content():
     return jsonify({'All': get_all()})
+
+
+@app.route('/get_free', methods=['GET'])
+def get_free_keys():
+    return jsonify({'All': get_free_content()})
 
 
 @app.route('/add', methods=['POST'])

@@ -21,6 +21,19 @@ def get_all():
     return result
 
 
+def get_free_content():
+    """
+    Lists the keys and computer ids.
+    :return:
+    """
+    all_keys = KeyModel.query.all()
+    result = []
+    for k in all_keys:
+        if k.authenticated_date is None:
+            result.append(k.get_dict())
+    return result
+
+
 def add_key(reader_key):
     k = KeyModel(reader_key)
     db_session.add(k)
