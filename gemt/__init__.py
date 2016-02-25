@@ -10,12 +10,12 @@ import os
 
 app = Flask(__name__)
 app.config.from_object(settings)
-if not os.environ.has_key('DATABASE_URL'):
+if 'DATABASE_URL' not in os.environ:
     os.environ['DATABASE_URL'] = 'postgresql+psycopg2://atenorio@/postgres'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 
 db = SQLAlchemy(app)
-db.create_all()
+# db.create_all()
 
 
 import gemt.views

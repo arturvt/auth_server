@@ -10,8 +10,7 @@ class KeysHandler(object):
 
     def add_key(self):
         self.created_date = get_current_date_formated()
-        add_key(reader_key=self.key_value, created_date=self.created_date)
-        return 'Success!'
+        return add_key(reader_key=self.key_value)
 
     def validate_key(self, machine_id=None):
         """

@@ -1,7 +1,9 @@
 from gemt import app
-from flask import jsonify, request
-from gemt.data.database import get_all, get_free_content
+from flask import jsonify, request, abort
+from gemt.data.database import get_all, get_free_content, get_summary, get_free_keys_list
+from gemt.data.util.data_util import generate_key
 from controller import KeysHandler
+import time
 
 help_app = ['Welcome to GEMT Reader server.']
 
@@ -25,6 +27,13 @@ def validate_schema(mandatory, optional=None):
         raise ParametersValidationException
 
 
+def validate_key():
+    if 'KEY' in request.headers:
+        if request.headers.get('KEY') == '38eedfc994339fbcf3b2025196068d99':
+            return
+    return abort(403)
+
+
 @app.route('/', methods=['GET'])
 def index():
     return '<br>'.join(help_app)
@@ -36,19 +45,36 @@ def help_route():
 
 
 @app.route('/get_all', methods=['GET'])
-def get_all_content():
+def get_all_content_view():
+    validate_key()
     return jsonify({'All': get_all()})
 
 
 @app.route('/get_free', methods=['GET'])
-def get_free_keys():
+def get_free_key_views():
+    validate_key()
     return jsonify({'All': get_free_content()})
+
+
+@app.route('/summary', methods=['GET'])
+def get_summary_view():
+    validate_key()
+    return jsonify({'All': get_summary(), 'free_keys': get_free_keys_list()})
 
 
 @app.route('/add', methods=['POST'])
 def add_key():
+    """
+    Add a number of keys equals to key_value.
+    :return:
+    """
+    validate_key()
     validate_schema(mandatory=['key_value'])
-    return jsonify({'Result': KeysHandler(request.json['key_value']).add_key()})
+    added = []
+    for _ in range(int(request.json['key_value'])):
+        added.append(KeysHandler(generate_key()).add_key())
+        time.sleep(1)
+    return jsonify({'Result': added})
 
 
 @app.route('/check/<string:key_value>', methods=['PUT'])

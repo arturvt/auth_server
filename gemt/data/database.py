@@ -27,17 +27,44 @@ def get_free_content():
     :return:
     """
     all_keys = KeyModel.query.all()
-    result = []
-    for k in all_keys:
-        if k.authenticated_date is None:
-            result.append(k.get_dict())
+    result = [k.get_dict() for k in all_keys if k.authenticated_date is None]
     return result
+
+
+def get_free_keys_list():
+    all_keys = KeyModel.query.all()
+    result = [k.reader_key for k in all_keys if k.authenticated_date is None]
+    return result
+
+
+def delete_one_used():
+    result = []
+    all_keys = KeyModel.query.all()
+    for ent in all_keys:
+        if ent.authenticated_date is not None:
+            result.append(ent.get_dict())
+            db_session.delete(ent)
+    db_session.commit()
+    return result
+
+
+def get_summary():
+    all_keys = KeyModel.query.all()
+    total = len(all_keys)
+    non_used = [k.get_dict() for k in all_keys if k.authenticated_date is None]
+    free_keys = len(non_used)
+    return {
+        'total_keys': total,
+        'used_keys': total - free_keys,
+        'free_keys': free_keys
+    }
 
 
 def add_key(reader_key):
     k = KeyModel(reader_key)
     db_session.add(k)
     db_session.commit()
+    return k.get_dict()
 
 
 def get_key(key_value):

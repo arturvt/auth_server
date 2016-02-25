@@ -21,11 +21,6 @@ keys_auth = {
 
 
 def fill_db():
-
-    # for d in keys_auth.itervalues():
-    #     c.execute('insert into auth_keys (reader_key, machine_id, created_date, authenticated_date) values (?, ?, ?, ?)',
-    #               [d['reader_key'], d['machine_id'], d['created_date'], d['authenticated_date']])
-
     for _ in range(20):
         k = KeyModel(generate_key())
         db_session.add(k)
